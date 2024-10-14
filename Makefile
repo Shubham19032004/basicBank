@@ -11,7 +11,7 @@ db_up:
 	migrate -path db/migrate -database "postgres://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose up
 
 db_down:
-	migrate -path db/migrate -database "postgres://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose db_down
+	migrate -path db/migrate -database "postgres://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose down
 
 migrate:
 	migrate create -ext sql -dir db/migrate -seq init_schema
