@@ -15,6 +15,7 @@ db_down:
 
 migrate:
 	migrate create -ext sql -dir db/migrate -seq init_schema
+sqlc:
+	sqlc generate
 
-
-.PHONY: postgres createdb dropdb 
+.PHONY: postgres createdb dropdb migrate db_up db_down sqlc
