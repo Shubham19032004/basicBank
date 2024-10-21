@@ -92,7 +92,7 @@ func (q *Queries) GetAccount(ctx context.Context, id int64) (Account, error) {
 
 const getAccountForUpdate = `-- name: GetAccountForUpdate :one
 SELECT id, owner, balance, currency, created_at FROM accounts
-WHERE id=$1 LIMIT 1 FOR UPDATE
+WHERE id=$1 LIMIT 1 FOR NO KEY UPDATE
 `
 
 func (q *Queries) GetAccountForUpdate(ctx context.Context, id int64) (Account, error) {
@@ -126,7 +126,7 @@ func (q *Queries) ListAccounts(ctx context.Context, arg ListAccountsParams) ([]A
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Account
+	items := []Account{}
 	for rows.Next() {
 		var i Account
 		if err := rows.Scan(
