@@ -13,6 +13,7 @@ CREATE TABLE "entries" (
   "created_at" timestamptz DEFAULT now()
 );
 
+
 CREATE TABLE "transfers" (
   "id" bigserial PRIMARY KEY,
   "from_account_id" bigint  NOT NULL,
@@ -30,6 +31,9 @@ CREATE INDEX ON "transfers" ("to_account_id");
 CREATE INDEX ON "transfers" ("from_account_id");
 
 CREATE INDEX ON "transfers" ("from_account_id", "to_account_id");
+
+
+
 
 ALTER TABLE "entries" ADD FOREIGN KEY ("account_id") REFERENCES "accounts" ("id");
 

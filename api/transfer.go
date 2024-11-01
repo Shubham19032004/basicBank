@@ -16,6 +16,7 @@ type transferRequest struct {
 	Currency      string `json:"currency"  blinding:"required,Currency"`
 }
 
+
 func (server *Server) CreateTransfer(ctx *gin.Context) {
 	var req transferRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
