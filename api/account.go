@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/lib/pq"
 )
 
 type createAccountRequest struct {
@@ -28,6 +29,14 @@ func (server *Server) createAccount(ctx *gin.Context) {
 	account, err := server.store.CreateAccount(ctx, arg)
 
 	if err != nil {
+		if pqErr,ok:=err.(*pq.Error);ok{
+			switch pqErr.Code.Name(){
+			case "foregin_key_violation","unique_violation":
+					ctx.JSON(http.StatusForbidden,errorResponse(err))
+					return
+				
+			}
+		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
@@ -62,6 +71,7 @@ type listAccountRequest struct {
 	PageID   int32 `form:"page" binding:"required,min=1"`
 	PageSize int32 `form:"limit" binding:"required,min=5,max=15"`
 }
+
 func (server *Server) listAccount(ctx *gin.Context) {
 	var req listAccountRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
