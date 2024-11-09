@@ -2,6 +2,9 @@ package api
 
 import (
 	db "bank/db/sqlc"
+	"bank/token"
+	"bank/utils"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -9,35 +12,50 @@ import (
 )
 
 // server serves HTTP requests for our banking service
-type Server struct{
-	store db.Store
-	router *gin.Engine
+type Server struct {
+	store      db.Store
+	tokenMaker token.Maker
+	config     utils.Config
+	router     *gin.Engine
 }
 
-// NewServer creates a new HTTP server and setup routing 
+// NewServer creates a new HTTP server and setup routing
 
-func NewServer(store db.Store) *Server{
-	server:=&Server{store: store}
-	router:=gin.Default()
-	// validation of currency 
-	if v,ok:=binding.Validator.Engine().(*validator.Validate);ok{
-		v.RegisterValidation("currency",validCurrency)
-		
+func NewServer(config utils.Config, store db.Store) (*Server, error) {
+	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
+	if err != nil {
+		return nil, fmt.Errorf("cannot create token maker:%w", err)
 	}
-	router.POST("/users",server.createUser)
+	server := &Server{
+		config:     config,
+		store:      store,
+		tokenMaker: tokenMaker,
+	}
+	
+	// validation of currency
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("currency", validCurrency)
 
-	router.POST("/accounts",server.createAccount)
-	router.GET("/accounts/:id",server.getAccount )
-	router.GET("/accounts",server.listAccount)
-	router.GET("/transfer",server.CreateTransfer)
+	}
+	server.setupRouter()
+	
+	return server, nil
+}
+func (server *Server) setupRouter(){
+	router := gin.Default()
+	router.POST("/users", server.createUser)
+	router.POST("/users/login", server.loginUser)
 
-	server.router=router
-	return server
+	router.POST("/accounts", server.createAccount)
+	router.GET("/accounts/:id", server.getAccount)
+	router.GET("/accounts", server.listAccount)
+	router.GET("/transfer", server.CreateTransfer)
+	server.router = router
 }
 
-func (server *Server) Start(address string) error{
+func (server *Server) Start(address string) error {
 	return server.router.Run(address)
 }
-func errorResponse(err error) gin.H{
-	return gin.H{"error":err}
+func errorResponse(err error) gin.H {
+	return gin.H{"error": err}
 }
