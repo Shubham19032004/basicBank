@@ -19,10 +19,13 @@ type Server struct{
 func NewServer(store db.Store) *Server{
 	server:=&Server{store: store}
 	router:=gin.Default()
+	// validation of currency 
 	if v,ok:=binding.Validator.Engine().(*validator.Validate);ok{
 		v.RegisterValidation("currency",validCurrency)
 		
 	}
+	router.POST("/users",server.createUser)
+
 	router.POST("/accounts",server.createAccount)
 	router.GET("/accounts/:id",server.getAccount )
 	router.GET("/accounts",server.listAccount)
