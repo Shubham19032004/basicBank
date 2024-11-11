@@ -10,19 +10,19 @@ dropdb:
 	docker exec -it postgres dropdb simple_bank
 
 migrateup:
-	migrate -path db/migrate  -database "$(DB_URL)" -verbose up
+	migration -path db/migration  -database "$(DB_URL)" -verbose up
 
 migrateup1:
-	migrate -path db/migrate  -database "$(DB_URL)" -verbose up 1
+	migration -path db/migration  -database "$(DB_URL)" -verbose up 1
 
 migratedown:
-	migrate -path db/migrate  -database "$(DB_URL)" -verbose down
+	migration -path db/migration  -database "$(DB_URL)" -verbose down
 
 migratedown1:
-	migrate -path db/migrate  -database "$(DB_URL)" -verbose down 1
+	migration -path db/migration  -database "$(DB_URL)" -verbose down 1
 
-migrate:
-	migrate create -ext sql -dir db/migrate -seq init_schema
+migration:
+	migration create -ext sql -dir db/migration -seq init_schema
 	
 sqlc:
 	sqlc generate
@@ -36,4 +36,4 @@ test:
 mock:
 	mockgen -package mockdb -destination db/mock/store.go bank/db/sqlc Store
 
-.PHONY: postgres createdb dropdb migrate migrateup migratedown migrateup1 migratedown1 sqlc test server mock 
+.PHONY: postgres createdb dropdb migration migrateup migratedown migrateup1 migratedown1 sqlc test server mock 
