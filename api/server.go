@@ -31,22 +31,23 @@ func NewServer(config utils.Config, store db.Store) (*Server, error) {
 		store:      store,
 		tokenMaker: tokenMaker,
 	}
-	
+
 	// validation of currency
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterValidation("currency", validCurrency)
 
 	}
 	server.setupRouter()
-	
+
 	return server, nil
 }
-func (server *Server) setupRouter(){
+func (server *Server) setupRouter() {
 	router := gin.Default()
 
 	router.POST("/users", server.createUser)
 	router.POST("/users/login", server.loginUser)
-	authRoutes:=router.Group("/").Use(authMiddleware(server.tokenMaker))
+	router.POST("/tokens/renew_access", server.renewAccessToken)
+	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
 	authRoutes.POST("/accounts", server.createAccount)
 	authRoutes.GET("/accounts/:id", server.getAccount)
 	authRoutes.GET("/accounts", server.listAccount)
