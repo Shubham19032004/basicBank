@@ -10,19 +10,19 @@ dropdb:
 	docker exec -it postgres dropdb simple_bank
 
 migrateup:
-	migration -path db/migration  -database "$(DB_URL)" -verbose up
+	migrate -path db/migration -database "$(DB_URL)"   -verbose up
 
 migrateup1:
-	migration -path db/migration  -database "$(DB_URL)" -verbose up 1
+	migrate -path db/migration  -database "$(DB_URL)" -verbose up 1
 
 migratedown:
-	migration -path db/migration  -database "$(DB_URL)" -verbose down
+	migrate -path db/migration  -database "$(DB_URL)" -verbose down
 
 migratedown1:
-	migration -path db/migration  -database "$(DB_URL)" -verbose down 1
+	migrate -path db/migration  -database "$(DB_URL)" -verbose down 1
 
 migration:
-	migration create -ext sql -dir db/migration -seq init_schema
+	migrate create -ext sql -dir db/migration -seq init_schema
 	
 sqlc:
 	sqlc generate
@@ -34,6 +34,16 @@ test:
 	go test -v -cover ./...
 
 mock:
-	mockgen -package mockdb -destination db/mock/store.go bank/db/sqlc Store
+	mockgen -package mockdb -destination db/mock/store.go bank/db/sqlc 
 
-.PHONY: postgres createdb dropdb migration migrateup migratedown migrateup1 migratedown1 sqlc test server mock 
+db_docs:
+	dbdocs build docs/db.dbml
+db_schema:
+	dbml2sql --postgres -o docs/schema.sql docs/db.dbml
+proto:
+	rm -f pb/*.go
+	protoc --proto_path=proto --go_out=pb --go_opt=paths=source_relative \
+    --go-grpc_out=pb --go-grpc_opt=paths=source_relative \
+    proto/*.proto
+
+.PHONY: postgres createdb dropdb migration migrateup migratedown migrateup1 migratedown1 sqlc test server mock db_docs db_schema proto
