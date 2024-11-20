@@ -36,6 +36,9 @@ func (server *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 	return rsp, nil
 }
 
+
+ 
+
 func (server *Server) LoginUser(ctx context.Context, req *pb.LoginUserRequest) (*pb.LoginUserResponse, error) {
 	user, err := server.store.GetUser(ctx, req.GetUsername())
 	if err != nil {
@@ -65,13 +68,13 @@ func (server *Server) LoginUser(ctx context.Context, req *pb.LoginUserRequest) (
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Error in creating refreshToken")
 	}
-
+	mtdt:=server.extractMetadata(ctx)
 	session, err := server.store.CreateSession(ctx, db.CreateSessionParams{
 		ID:           refreshPayload.ID,
 		Username:     user.Username,
 		RefreshToken: refreshToken,
-		UserAgent:    "",
-		ClientIp:     "",
+		UserAgent:    mtdt.UserAgent,
+		ClientIp:     mtdt.ClientIp,
 		IsBlocked:    false,
 		ExpiresAt:    refreshPayload.ExpiredAt,
 	})
