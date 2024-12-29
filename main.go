@@ -85,6 +85,6 @@ func runGinServer(config utils.Config, store db.Store) {
 	}
 	err = server.Start(config.HttpServerAddress)
 	if err != nil {
-		log.Fatal("cannot start server:", err)
+		log.Fatal("cannot start server at port:", err)
 	}
 }
