@@ -52,6 +52,8 @@ func runGrpcServer(config utils.Config, store db.Store) {
 		log.Fatal("cannot start grpc:", err)
 	}
 }
+
+
 func runGateWayServer(config utils.Config, store db.Store) {
 	server, err := gapi.NewServer(config, store)
 	if err != nil {
